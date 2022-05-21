@@ -21,7 +21,7 @@ def index():
 @app.route("/scrape")
 def scrape():
 
-    mars = MongoClient.db.mars
+    mars = mongo.db.mars
 
     mars_data = scraping.scrape_all()
 
