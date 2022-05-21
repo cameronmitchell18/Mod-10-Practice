@@ -10,12 +10,26 @@ def scrape_all():
      #Initialize headless driver for deployment 
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=True)
+    
+    news_title, news_paragraph = mars_news(browser)
+    
+    data = {
+      "news_title": news_title,
+      "news_paragraph": news_paragraph,
+      "featured_image": featured_image(browser),
+      "facts": mars_facts(),
+      "last_modified": dt.datetime.now()
+}
+
+    browser.quit()
+    return data
+
+
 
 def mars_news(browser):
 
     # setting url to the website we want to scrape 
     url = 'https://redplanetscience.com/'
-
     browser.visit(url)
 
     # Optional delay for loading the page 
@@ -25,6 +39,7 @@ def mars_news(browser):
 
     browser.is_element_present_by_css('div.list_test' , wait_time = 1)
 
+    # Convert the browser html to a soup object and then quit the browser
     html = browser.html
 
     news_soup = soup(html , 'html.parser')
@@ -82,9 +97,7 @@ def featured_image(browser):
     except AttributeError:
         return None
 
-# NOTE: .get('src') pulls the link to the image.
-# Use the base URL to create an absolute URL
-
+    # Use the base url to create an absolute url
     img_url = f'https://spaceimages-mars.com/{img_url_rel}'
 
     return img_url
@@ -99,15 +112,11 @@ def mars_facts():
     df.columns=['description', 'Mars', 'Earth']
     df.set_index('description', inplace=True)
 
-    return df.to_html()
+    return df.to_html(classes="table table-striped")
 
-#browser.quit()
+if __name__ == '__main__':
 
-# df = pd.read_html('https://galaxyfacts-mars.com')[0]
-# df.columns=['description', 'Mars', 'Earth']
-# df.set_index('description', inplace=True)
-# df.to_html()
-
-#browser.quit()
+    # If running as script, print scrapped data 
+    print(scrape_all())
 
 
